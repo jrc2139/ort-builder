@@ -180,10 +180,34 @@ else
   echo "  You may need to install: apt install libclang-rt-${CLANG_VERSION}-dev"
 fi
 
+# Add libc++ and libc++abi static libraries (required since ORT was built with -stdlib=libc++)
+LIBCXX_PATH="/usr/lib/llvm-${CLANG_VERSION}/lib/libc++.a"
+LIBCXXABI_PATH="/usr/lib/llvm-${CLANG_VERSION}/lib/libc++abi.a"
+LIBUNWIND_PATH="/usr/lib/llvm-${CLANG_VERSION}/lib/libunwind.a"
+if [[ -f "$LIBCXX_PATH" ]] && [[ -f "$LIBCXXABI_PATH" ]]; then
+  # Use temp copies to avoid ar issues with ++ in paths
+  cp "$LIBCXX_PATH" /tmp/libcxx_static.a
+  cp "$LIBCXXABI_PATH" /tmp/libcxxabi_static.a
+  echo "ADDLIB /tmp/libcxx_static.a" >>/tmp/combine_libs.mri
+  echo "ADDLIB /tmp/libcxxabi_static.a" >>/tmp/combine_libs.mri
+  echo "Added libc++ static libraries from: /usr/lib/llvm-${CLANG_VERSION}/lib/"
+else
+  echo "WARNING: libc++ static libraries not found"
+  echo "  Install via: apt install libc++-${CLANG_VERSION}-dev libc++abi-${CLANG_VERSION}-dev"
+fi
+
+# Add libunwind for exception handling support
+if [[ -f "$LIBUNWIND_PATH" ]]; then
+  echo "ADDLIB ${LIBUNWIND_PATH}" >>/tmp/combine_libs.mri
+  echo "Added libunwind from: ${LIBUNWIND_PATH}"
+else
+  echo "WARNING: libunwind not found at ${LIBUNWIND_PATH}"
+fi
+
 # Add all abseil libraries
 while IFS= read -r lib; do
   [[ -n "$lib" ]] && echo "ADDLIB ${lib}" >>/tmp/combine_libs.mri
-done <<< "$ABSEIL_LIBS"
+done <<<"$ABSEIL_LIBS"
 
 echo "SAVE" >>/tmp/combine_libs.mri
 echo "END" >>/tmp/combine_libs.mri
@@ -204,4 +228,3 @@ echo "  cp include/onnxruntime_c_api.h /path/to/fastembed-zig/deps/onnxruntime-s
 echo "  cp libs/linux-x86_64/libonnxruntime_all.a /path/to/fastembed-zig/deps/onnxruntime-static/lib/"
 echo ""
 echo "Then build osgrep-zig with: zig build -Dstatic=true"
-
