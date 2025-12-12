@@ -91,6 +91,7 @@ BUILD_ARGS=(
   --disable_ml_ops
   --skip_tests
   --compile_no_warning_as_error
+  --allow_running_as_root
 )
 
 # Only add reduced ops flags if a config file was provided
