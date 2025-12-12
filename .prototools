@@ -1,0 +1,17 @@
+# Proto toolchain configuration for ort-builder
+# https://moonrepo.dev/docs/proto
+
+# for building
+cmake = "3.31.10"
+protoc = "21.11"
+
+# Python for onnxruntime build scripts
+python = "3.12.11"
+
+[settings]
+# Auto-install tools when detected
+auto-install = true
+
+[plugins.tools]
+protoc = "https://raw.githubusercontent.com/b4nst/proto-plugins/refs/heads/main/toml/protoc.toml"
+cmake = "https://raw.githubusercontent.com/Phault/proto-toml-plugins/main/cmake/plugin.toml"

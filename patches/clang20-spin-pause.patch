@@ -1,0 +1,19 @@
+diff --git i/onnxruntime/core/common/spin_pause.cc w/onnxruntime/core/common/spin_pause.cc
+index 329f3f125a..44c6bb697f 100644
+--- i/onnxruntime/core/common/spin_pause.cc
++++ w/onnxruntime/core/common/spin_pause.cc
+@@ -35,7 +35,13 @@ void SpinPause() {
+ #if defined(_WIN32)
+     _tpause(0x0, __rdtsc() + tpause_spin_delay_cycles);
+ #elif defined(__linux__)
+-    __builtin_ia32_tpause(0x0, __rdtsc() + tpause_spin_delay_cycles);
++    // Clang 20+ changed __builtin_ia32_tpause signature to take high/low parts
++    uint64_t deadline = __rdtsc() + tpause_spin_delay_cycles;
++#if __clang_major__ >= 20
++    __builtin_ia32_tpause(0x0, static_cast<uint32_t>(deadline >> 32), static_cast<uint32_t>(deadline));
++#else
++    __builtin_ia32_tpause(0x0, deadline);
++#endif
+ #else
+     _mm_pause();
+ #endif
