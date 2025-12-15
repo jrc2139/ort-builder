@@ -90,7 +90,6 @@ BUILD_ARGS=(
   --parallel
   --disable_ml_ops
   --skip_tests
-  --skip_submodule_sync
   --compile_no_warning_as_error
   --allow_running_as_root
 )
