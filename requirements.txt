@@ -1,5 +1,14 @@
-#tensorflow==2.8
-#tf2onnx
+# Python dependencies for building ONNX Runtime
+# Install with: pip install -r requirements.txt
+
+# Required for ONNX Runtime build scripts
+numpy >= 1.21.6
+
+# For model conversion/testing (optional)
 onnxruntime==1.23.2
 onnx==1.20.0
 bin2c
+
+# Note: ninja must be installed via system package manager:
+#   macOS: brew install ninja
+#   Linux: apt install ninja-build
