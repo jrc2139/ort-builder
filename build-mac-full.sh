@@ -74,6 +74,13 @@ python onnxruntime/tools/ci_build/build.py "${BUILD_ARGS[@]}"
 
 BUILD_DIR=./onnxruntime/build/macOS_${ARCH}/${CMAKE_BUILD_TYPE}
 
+# Build re2 if not already built (ORT configures but doesn't always build it)
+if [[ ! -f "${BUILD_DIR}/_deps/re2-build/libre2.a" ]] && [[ -d "${BUILD_DIR}/_deps/re2-build" ]]; then
+  echo ""
+  echo "Building re2 static library..."
+  cmake --build "${BUILD_DIR}/_deps/re2-build" --config ${CMAKE_BUILD_TYPE} --target re2
+fi
+
 echo ""
 echo "Build complete. Combining static libraries..."
 
@@ -144,6 +151,7 @@ for lib in \
   _deps/re2-build/libre2.a \
   _deps/google_nsync-build/libnsync_cpp.a \
   _deps/pytorch_cpuinfo-build/libcpuinfo.a \
+  _deps/kleidiai-build/libkleidiai.a \
   ; do
   if [ -f "${BUILD_DIR}/${lib}" ]; then
     LIBS="${LIBS} ${BUILD_DIR}/${lib}"
