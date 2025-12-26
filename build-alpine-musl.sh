@@ -184,29 +184,16 @@ if [[ -f "$NSYNC_LIB" ]]; then
 	echo "ADDLIB ${NSYNC_LIB}" >>/tmp/combine_libs.mri
 fi
 
-# Add libc++ static libraries (for Zig ABI compatibility)
-# Alpine installs these in /usr/lib
-if [[ -f "/usr/lib/libc++.a" ]]; then
-	echo "ADDLIB /usr/lib/libc++.a" >>/tmp/combine_libs.mri
-	echo "Added: libc++.a"
-fi
-if [[ -f "/usr/lib/libc++abi.a" ]]; then
-	echo "ADDLIB /usr/lib/libc++abi.a" >>/tmp/combine_libs.mri
-	echo "Added: libc++abi.a"
-fi
-
-# Add compiler-rt builtins if available
-BUILTINS=$(find /usr/lib/clang -name "libclang_rt.builtins-*.a" 2>/dev/null | head -1)
-if [[ -n "$BUILTINS" && -f "$BUILTINS" ]]; then
-	echo "ADDLIB ${BUILTINS}" >>/tmp/combine_libs.mri
-	echo "Added: $(basename "$BUILTINS")"
-fi
-
-# Add libunwind for exception handling
-if [[ -f "/usr/lib/libunwind.a" ]]; then
-	echo "ADDLIB /usr/lib/libunwind.a" >>/tmp/combine_libs.mri
-	echo "Added: libunwind.a"
-fi
+# NOTE: We intentionally DO NOT include libc++, libc++abi, compiler-rt, or libunwind
+# in the merged archive. These libraries have embedded .deplibs sections that cause
+# linker errors when cross-compiling with Zig (e.g., "unable to find library: pthread").
+# Zig bundles its own libc++ and will provide these at link time automatically.
+#
+# Previously included (removed to fix Zig cross-compilation):
+# - /usr/lib/libc++.a
+# - /usr/lib/libc++abi.a
+# - /usr/lib/clang/.../libclang_rt.builtins-*.a
+# - /usr/lib/libunwind.a
 
 # Add libexecinfo for backtrace support (musl)
 if [[ -f "/usr/lib/libexecinfo.a" ]]; then
