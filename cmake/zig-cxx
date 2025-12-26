@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Zig C++ compiler wrapper for musl cross-compilation
+# Uses ZIG_TARGET env var (set by build-linux-musl.sh)
+
+TARGET="${ZIG_TARGET:-x86_64-linux-musl}"
+
+# ARM64 needs explicit CPU features for BFLOAT16 support
+if [[ "$TARGET" == aarch64* ]]; then
+  exec zig c++ -target "$TARGET" -mcpu=generic+bf16 "$@"
+else
+  exec zig c++ -target "$TARGET" "$@"
+fi

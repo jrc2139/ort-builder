@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Zig ar wrapper for static library creation
+exec zig ar "$@"

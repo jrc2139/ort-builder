@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Zig ranlib wrapper for static library indexing
+exec zig ranlib "$@"
